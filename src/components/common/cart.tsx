@@ -18,7 +18,7 @@ import {
 import CartItem from "./cart-item";
 
 const Cart = () => {
-  const { data: cart, isPending } = useQuery({
+  const { data: cart } = useQuery({
     queryKey: ["cart"],
     queryFn: () => getCart(),
   });
