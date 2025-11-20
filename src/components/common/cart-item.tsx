@@ -4,6 +4,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 
 import { decreaseProductItemQuantity } from "@/actions/decrease-cart-item-quantity";
+import { increaseProductItemQuantity } from "@/actions/increase-cart-product";
 import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
 
@@ -42,8 +43,20 @@ const CartItem = ({
       queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
   });
-  const handledecreaseCartProductQuantity = () =>
+  const handleDecreaseCartProductQuantity = () =>
     decreaseCartProductQuantityMutation.mutate();
+
+  const increaseCartProductQuantityMutation = useMutation({
+    mutationKey: ["increase-cart-product"],
+    mutationFn: () => increaseProductItemQuantity({ cartItemId: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
+  const handleIncreaseCartProductQuantity = () =>
+    increaseCartProductQuantityMutation.mutate();
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -61,16 +74,18 @@ const CartItem = ({
           </p>
           <div className="flex w-[100px] items-center justify-between rounded-lg border p-1">
             <Button
-              onClick={() => {
-                handledecreaseCartProductQuantity();
-              }}
+              onClick={handleDecreaseCartProductQuantity}
               variant="ghost"
               className="h-4 w-4"
             >
               <MinusIcon />
             </Button>
             {quantity}
-            <Button onClick={() => {}} variant="ghost" className="h-4 w-4">
+            <Button
+              onClick={handleIncreaseCartProductQuantity}
+              variant="ghost"
+              className="h-4 w-4"
+            >
               <PlusIcon />
             </Button>
           </div>

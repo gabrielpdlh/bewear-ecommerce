@@ -12,7 +12,7 @@ import {
   increaseProductItemQuantitySchema,
 } from "./schema";
 
-export const decreaseProductItemQuantity = async (
+export const increaseProductItemQuantity = async (
   data: IncreaseProductItemQuantitySchema,
 ) => {
   increaseProductItemQuantitySchema.parse(data);
