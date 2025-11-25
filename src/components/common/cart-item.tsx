@@ -7,6 +7,9 @@ import { decreaseProductItemQuantity } from "@/actions/decrease-cart-item-quanti
 import { increaseProductItemQuantity } from "@/actions/increase-cart-product";
 import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
+import { useDecreaseQuantity } from "@/hooks/mutations/use-decrease-product";
+import { useIncreaseProduct } from "@/hooks/mutations/use-increase-product";
+import { useRemoveProductFromCart } from "@/hooks/mutations/use-remove-products-from-cart";
 
 import { Button } from "../ui/button";
 
@@ -27,33 +30,23 @@ const CartItem = ({
   productVariantTotalPriceInCents,
   quantity,
 }: CartItemProps) => {
-  const queryClient = useQueryClient();
-  const { mutate } = useMutation({
-    mutationKey: ["remove-cart-product"],
-    mutationFn: () => removeProductFromCart({ cartItemId: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Produto removido do carrinho");
-    },
-  });
-  const decreaseCartProductQuantityMutation = useMutation({
-    mutationKey: ["decrease-cart-product-quantity"],
-    mutationFn: () => decreaseProductItemQuantity({ cartItemId: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  const removeProductFromCart = useRemoveProductFromCart(id);
+  const handleDeleteClick = () => {
+    removeProductFromCart.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Produto removido do carrinho.");
+      },
+      onError: () => {
+        toast.error("Erro ao remover produto do carrinho.");
+      },
+    });
+  };
+
+  const decreaseCartProductQuantityMutation = useDecreaseQuantity(id);
   const handleDecreaseCartProductQuantity = () =>
     decreaseCartProductQuantityMutation.mutate();
 
-  const increaseCartProductQuantityMutation = useMutation({
-    mutationKey: ["increase-cart-product"],
-    mutationFn: () => increaseProductItemQuantity({ cartItemId: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
-
+  const increaseCartProductQuantityMutation = useIncreaseProduct(id);
   const handleIncreaseCartProductQuantity = () =>
     increaseCartProductQuantityMutation.mutate();
 
@@ -92,7 +85,11 @@ const CartItem = ({
         </div>
       </div>
       <div className="flex flex-col items-end justify-center gap-2">
-        <Button onClick={() => mutate()} variant="outline" size="icon">
+        <Button
+          onClick={() => handleDeleteClick()}
+          variant="outline"
+          size="icon"
+        >
           <TrashIcon />
         </Button>
         <p className="text-sm font-bold">
