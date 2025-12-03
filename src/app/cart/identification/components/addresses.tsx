@@ -131,9 +131,9 @@ const Addresses = ({ shippingAddresses, defaultShippingAddressId }: AddressesPro
               <Card key={address.id}>
                 <CardContent>
                   <div className="flex items-start space-x-2">
-                    <RadioGroupItem value={address.id} id={address.id} />
+                    <RadioGroupItem value={address.id ?? ''} id={address.id ?? ''} />
                     <div className="flex-1">
-                      <Label htmlFor={address.id} className="cursor-pointer">
+                      <Label htmlFor={address.id ?? ''} className="cursor-pointer">
                         <div>
                           <p className="text-sm">
                             {address.recipientName} • {address.street},{" "}
