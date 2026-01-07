@@ -1,13 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
 import { toast } from "sonner";
 import z from "zod";
 
-import { getCart } from "@/actions/get-cart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -25,6 +25,8 @@ import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
+
+import { formatAddress } from "../../helpers/address";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -44,12 +46,17 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface AddressesProps {
   shippingAddresses: (typeof shippingAddressTable.$inferInsert)[];
-  defaultShippingAddressId: string | null
-  
+  defaultShippingAddressId: string | null;
 }
 
-const Addresses = ({ shippingAddresses, defaultShippingAddressId }: AddressesProps) => {
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(defaultShippingAddressId);
+const Addresses = ({
+  shippingAddresses,
+  defaultShippingAddressId,
+}: AddressesProps) => {
+  const router = useRouter();
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(
+    defaultShippingAddressId,
+  );
   const createShippingAddressMutation = useCreateShippingAddress();
   const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
   const { data: addresses, isLoading } = useUserAddresses({
@@ -97,7 +104,7 @@ const Addresses = ({ shippingAddresses, defaultShippingAddressId }: AddressesPro
       await updateCartShippingAddressMutation.mutateAsync({
         shippingAddressId: selectedAddress,
       });
-      toast.success("Endereço selecionado para entrega");
+      router.push("/cart/confirmation");
     } catch (error) {
       console.log("Erro ao selecionar endereço", error);
       toast.error("Erro ao selecionar endereço");
@@ -131,17 +138,27 @@ const Addresses = ({ shippingAddresses, defaultShippingAddressId }: AddressesPro
               <Card key={address.id}>
                 <CardContent>
                   <div className="flex items-start space-x-2">
-                    <RadioGroupItem value={address.id ?? ''} id={address.id ?? ''} />
+                    <RadioGroupItem
+                      value={address.id ?? ""}
+                      id={address.id ?? ""}
+                    />
                     <div className="flex-1">
-                      <Label htmlFor={address.id ?? ''} className="cursor-pointer">
+                      <Label
+                        htmlFor={address.id ?? ""}
+                        className="cursor-pointer"
+                      >
                         <div>
                           <p className="text-sm">
-                            {address.recipientName} • {address.street},{" "}
-                            {address.number}
-                            {address.complement &&
-                              `, ${address.complement}`}, {address.neighborhood}
-                            , {address.city} - {address.state} • CEP:{" "}
-                            {address.zipCode}
+                            {formatAddress({
+                              recipientName: address.recipientName,
+                              street: address.street,
+                              number: address.number,
+                              complement: address.complement ?? null,
+                              neighborhood: address.neighborhood,
+                              city: address.city,
+                              state: address.state,
+                              zipCode: address.zipCode,
+                            })}
                           </p>
                         </div>
                       </Label>
