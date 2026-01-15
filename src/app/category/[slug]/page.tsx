@@ -18,7 +18,7 @@ const CategoryPage = async ({ params }: CategoryPageProps) => {
   });
 
   if (!category) {
-    return notFound;
+    return notFound();
   }
 
   const products = await db.query.productTable.findMany({
